@@ -1,0 +1,66 @@
+nav {
+    margin: 2% 0;
+    padding: 2% 0;
+}
+
+a{
+    color: black;
+}
+
+#nav ul {
+    list-style: none;
+    text-align: center;
+}
+
+.material-icons.md-48 { font-size: 48px; }
+
+nav ul li {
+    margin: 20px 0;
+}
+
+#nav {
+    position: relative;
+    border-radius: 6px;
+}
+
+#spinner {
+    display: none;
+}
+
+
+
+#commands-info{
+    padding-left: 0;
+    font-size: 14px;
+    position: absolute;
+    list-style: initial;
+    text-align: left;
+    left: 2%;
+}
+
+#commands-info ul {
+    list-style: initial;
+    line-height: 14px;
+    padding-left: 20px;
+    text-align: left;
+}
+
+#commands-info ul li {
+    line-height: 18px;
+    padding-left: 20px;
+    text-align: left;
+    margin: 15px;
+}
+
+ul li .btn-mic {
+   border-radius: 100px;
+   box-shadow: 0px 0px 5px gray;
+}
+
+.card {
+    display: inline-block;
+}
+
+.card-columns {
+    margin: 5% 0%;
+}

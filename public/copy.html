@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src=./annyang.js> </script> <script src=./jquery-3.4.1.min.js> </script> <script type="text/javascript">
+        var result1 = "";
+
+        annyang.start({ autoRestart: false, continuous: true })
+        var recognition = annyang.getSpeechRecognizer();
+        var final_transcript = '';
+        recognition.interimResult = true;
+        recognition.onresult = function (event) {
+            var pasttime = new Date().getSeconds();
+
+            var interim_transcript = '';
+            final_transcript = '';
+            for (var i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    final_transcript += event.results[i][0].transcript;
+                    console.log("final_transcript=" + final_transcript);
+                }
+                else {
+                    interim_transcript += event.results[i][0].transcript;
+                    console.log("interim_transcript=" + interim_transcript);
+                }
+                /*
+                 if (annyang) {
+                   var commands = {
+                   'hello': function() {
+                   logStatus();
+                   annyang.pause();
+                   logStatus();
+                   console.log("정지");
+                   setTimeout(logStatus, 100);
+                   }
+                   }
+        annyang.addCommands(commands);
+        annyang.start();
+      }
+                */
+                result1 = interim_transcript + final_transcript
+
+            }
+            if (annyang.isListening() == true) {
+                if (result1.search("^시리야 ") >= 0 || result1.search("^시리아 ") >= 0) {
+                    console.log('시리위치1' + result1.indexOf("시리야 "));
+                    result1 = result1.substring(4, result1.length);
+                    console.log('interim=' + interim_transcript + '|final=' + final_transcript);
+                    document.getElementById('result').value = result1;
+                    interim_transcript = "";
+                    final_transcript = "";
+                    setLang('euc-kr');
+                    console.log('annyang.isListening()', annyang.isListening());
+                    ttsTest();
+                }
+                else if (result1.search("^ 시리야 ") >= 0 || result1.search("^ 시리아 ") >= 0) {
+                    result1 = result1.substring(5, result1.length);
+                    document.getElementById('result').value = result1;
+                    interim_transcript = "";
+                    final_transcript = "";
+                    setLang('euc-kr'); ttsTest();
+                }
+                else if (result1.search("^시리야") >= 0 || result1.search("^시리아") >= 0) {
+                    console.log('시리위치2' + result1.indexOf("시리야"));
+                    result1 = result1.substring(3, result1.length);
+                    console.log('interim=' + interim_transcript + '|final=' + final_transcript);
+                    document.getElementById('result').value = result1;
+                    interim_transcript = "";
+                    final_transcript = "";
+                    setLang('euc-kr'); ttsTest();
+                }
+
+            }
+            //result1= result1.replace('^시리야|^시리아','ㄱ')
+            //document.getElementById('result').value = interim_transcript+final_transcript;
+
+
+            if (result1.search("^일시 정지") >= 0 || result1.search("^ 일시 정지") >= 0) {
+                annyang.pause();
+                console.log("일시정지");
+                console.log('annyang.isListening()', annyang.isListening());
+            }
+            if (result1.search("^시작") >= 0 || result1.search("^ 시작") >= 0) {
+                annyang.resume();
+                console.log("시작");
+                console.log('annyang.isListening()', annyang.isListening());
+            }
+        };
+        //mic.onclick=null;
+
+
+        function button1_click() {
+            location.href = "https://www.google.co.kr/search?q=" + document.getElementById('result').value
+
+        }
+
+        var msg = new SpeechSynthesisUtterance();
+        msg.lang = 'en-US';
+        function ttsTest() {
+
+            msg.rate = 0.6; // 0.1 ~ 10      
+            msg.pitch = 1.8; // 0 ~ 2
+
+            msg.text = result1 + "를 검색하시겠습니까?"
+            speechSynthesis.speak(msg);
+        }
+        function setLang(langTxt) {
+            msg.lang = langTxt;
+        }
+
+
+    </script>
+
+</head>
+
+<body>
+
+    <h3 id=two>
+        음성 인식 테스트
+    </h3>
+    <form>
+        <input type="text" id="result" style="width:200;height:30px;font-size:30px;">
+        <img id="img" src="./mic.png" height="40" width="40"></img>
+    </form>
+    <button id="button1" onclick="button1_click();">검색</button>
+
+    <br>
+
+    <!--<font size="8" id="result">
+            마이크에 음성을 입력 하세요.
+        </font>-->
+
+
+    <!--<button onclick="setLang('euc-kr'); ttsTest();">음성말하기</button>-->
+
+    <iframe id="one" src="http://search.daum.net/search?w=tot&DA=YZR&t__nil_searchbox=btn&sug=&sugo=&q=d" width="800"
+        height="1000"> </iframe>
+
+
+</body>
+
+</html>

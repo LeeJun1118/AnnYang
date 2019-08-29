@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href=".\bootstrap.css">
+  <link rel="stylesheet" href=".\index.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src=./annyang.js> </script> <script src=./jquery-3.4.1.min.js> </script> <script type="text/javascript">
+    var result1 = "";
+
+    annyang.start({ autoRestart: false, continuous: true })
+    var recognition = annyang.getSpeechRecognizer();
+    var final_transcript = '';
+    recognition.interimResult = true;
+    // author: 서현규
+    // description : 안양 API 인식 중일 경우 spinner가 나타나는 이벤트
+    var micBtnToggle = true;
+    function toggleSwitchChange() 
+    {
+      const spinner = document.getElementById('spinner');
+      console.log('micBtnToggle = ' + micBtnToggle);
+      console.log('annyang.isListening = ' + annyang.isListening());
+      if (micBtnToggle === false && annyang.isListening() === false) 
+      {
+        micBtnToggle = true;
+        annyang.resume();
+        spinner.style.display = 'none';
+        return;
+      }
+      if (micBtnToggle === true && annyang.isListening() === true) 
+      {
+        micBtnToggle = false;
+        annyang.pause();
+        spinner.style.display = 'inline-block';
+      }
+    }
+
+    recognition.onresult = function (event) {
+      var pasttime = new Date().getSeconds();
+      let spinner = document.getElementById('spinner');
+      var interim_transcript = '';
+      final_transcript = '';
+      for (var i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          final_transcript += event.results[i][0].transcript;
+          console.log("final_transcript=" + final_transcript);
+        }
+        else {
+          interim_transcript += event.results[i][0].transcript;
+          console.log("interim_transcript=" + interim_transcript);
+        }
+        /*
+         if (annyang) {
+           var commands = {
+           'hello': function() {
+           logStatus();
+           annyang.pause();
+           logStatus();
+           console.log("정지");
+           setTimeout(logStatus, 100);
+           }
+           }
+           annyang.addCommands(commands);
+           annyang.start();
+           }
+        */
+        result1 = interim_transcript + final_transcript
+
+      }
+      if (annyang.isListening() == true) {
+        if (result1.search("^시리야 ") >= 0 || result1.search("^시리아 ") >= 0) {
+          console.log('시리위치1' + result1.indexOf("시리야 "));
+          result1 = result1.substring(4, result1.length);
+          console.log('interim=' + interim_transcript + '|final=' + final_transcript);
+          document.getElementById('result').value = result1;
+          interim_transcript = "";
+          final_transcript = "";
+          setLang('euc-kr');
+          console.log('annyang.isListening()', annyang.isListening());
+          ttsTest();
+        }
+        else if (result1.search("^ 시리야 ") >= 0 || result1.search("^ 시리아 ") >= 0) {
+          result1 = result1.substring(5, result1.length);
+          document.getElementById('result').value = result1;
+          interim_transcript = "";
+          final_transcript = "";
+          setLang('euc-kr'); ttsTest();
+        }
+        else if (result1.search("^시리야") >= 0 || result1.search("^시리아") >= 0) {
+          console.log('시리위치2' + result1.indexOf("시리야"));
+          result1 = result1.substring(3, result1.length);
+          console.log('interim=' + interim_transcript + '|final=' + final_transcript);
+          document.getElementById('result').value = result1;
+          interim_transcript = "";
+          final_transcript = "";
+          setLang('euc-kr'); ttsTest();
+        }
+
+      }
+      //result1= result1.replace('^시리야|^시리아','ㄱ')
+      //document.getElementById('result').value = interim_transcript+final_transcript;
+
+
+      if (result1.search("^일시 정지") >= 0 || result1.search("^ 일시 정지") >= 0 || result1.search("^ 일시정지") >= 0 || result1.search("^일시정지") >= 0) {
+        annyang.pause();
+        spinner.style.display = 'none';
+        console.log("일시정지");
+        console.log('annyang.isListening()', annyang.isListening());
+      }
+      if (result1.search("^시작") >= 0 || result1.search("^ 시작") >= 0) {
+        annyang.resume();
+        spinner.style.display = 'inline-block';
+        console.log("시작");
+        console.log('annyang.isListening()', annyang.isListening());
+      }
+    };
+    //mic.onclick=null;
+
+
+    function button1_click() {
+      location.href = "https://www.google.co.kr/search?q=" + document.getElementById('result').value
+
+    }
+
+    var msg = new SpeechSynthesisUtterance();
+    msg.lang = 'en-US';
+    function ttsTest() {
+
+      msg.rate = 0.6; // 0.1 ~ 10      
+      msg.pitch = 1.8; // 0 ~ 2
+
+      msg.text = result1 + "를 검색하시겠습니까?"
+      speechSynthesis.speak(msg);
+    }
+    function setLang(langTxt) {
+      msg.lang = langTxt;
+    }
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <!-- header -->
+    <div class="col-sm-4">
+
+    </div>
+    <div class="jumbotron">
+        <div class="text-center title">
+            <h3 style="font-weight: bold">음성인식 테스트</h3>
+            <button type="button" class="btn btn-success btn-mic" onclick="toggleSwitchChange();">
+                <i class="material-icons material-icons md-48">mic</i>
+            </button><br>
+        
+            <div id="spinner" class="spinner-grow text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <div class="alert alert-primary" role="alert"><!---->
+                <ul>
+                  <li>시리야, 시리아를 먼저 말하면 검색창에 나옵니다.</li>
+                  <li>'검색'이 붙어야 자동으로 검색합니다.<br></li>
+                  <li>검색창에 뜨면 그것을 읽어줍니다.</li>
+                  <li>일시정지하면 검색이 안됩니다.</li>
+                  <li>"시작"이라고 말하면 일시정지가 풀립니다.</li>
+                </ul>
+            </div>
+            <form class="form-inline">
+                <input id="voice-result" class="form-control mr-sm-2" type="search" placeholder="음성인식 결과" aria-label="Search">
+                <button id="button1" onclick="button1_click();" class="btn btn-outline-success my-2 my-sm-2" type="submit">검색</button>
+            </form>
+
+        </div>
+    </div>
+
+    <!--<font size="8" id="result">     
+                마이크에 음성을 입력 하세요.
+            </font>-->
+
+    <!--<button onclick="setLang('euc-kr'); ttsTest();">음성말하기</button>-->
+
+    <!-- Contents Area -->
+    <div>
+      <!-- <iframe id="one" src="http://search.daum.net/search?w=tot&DA=YZR&t__nil_searchbox=btn&sug=&sugo=&q=d" width="800"
+        height="1000"></iframe> -->
+      <!--
+          Author: 서현규
+          Description : 컨텐츠 디자인
+          ******************** START ********************
+        -->
+      <div class="card-columns">
+        <div class="card">
+          <img src="http://placehold.it/300" class="card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title">Card title that wraps to a new line</h5>
+            <p class="card-text">This is a longer card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer --> 
+  <footer class="page-footer font-small bg-primary">
+    <!-- Copyright -->
+    <div class="footer-copyright text-center py-3 text-white">© 2018 Copyright: Team-annyang
+    </div>
+
+  </footer>
+  
+  <script>
+    /*********************************** START ************************************/
+    // Author: 서현규
+    // Description: 데이터 받아온거 카드로 뿌려주는 함수
+    function createCard(cardData) {
+      var cardTemplate = [
+        '<div class="card">',
+        '<img src="',
+        // 이 줄에 음식점 썸네일 사진 주소 https://[이미지 주소], 또는 변수
+        cardData.img || 'NO image',
+        ,'" class="card-img-top" alt="음식점 썸네일">',
+        '<div class="card-body">',
+        '<h5 class="card-title">',
+        // 이 줄에 식당이름     cardData.[식당이름변수] || '이름없을 경우 초기값 여기에 넣어주세요.'
+        cardData.name || 'No Name',
+        '</h5>',
+        '<p class="card-text">',
+        // 이 줄에 식당설명     cardData.[식당내용변수] || '설명없을 경우 여기에 초기값을 넣어주세요.'
+        cardData.desc || 'No desc',
+        '</p>',
+        '</div>',
+        '</div>'
+      ];
+      
+      // 카드 노드 리턴
+      return $(cardTemplate.join(''));
+    }
+
+    // 더미 데이터
+    var data = [
+      {"img": 'http://placehold.it/100', "name":"국대떡볶이", "desc":"국대떡볶이는 떡볶이 전문점!"},
+      {"img": 'http://placehold.it/200', "name":"죠스떡볶이", "desc":"죠스떡볶이는 튀김과 국물떡볶이 전문점!"},
+      {"img": 'http://placehold.it/300', "name":"신전떡볶이", "desc":"신전떡볶이는 떡볶이 및 세트메뉴 전문점!"}
+    ];
+
+    var cards = $();
+    // 각 카드 노드들 전부 저장
+    data.forEach(function(item, idx) {
+      cards = cards.add(createCard(item));
+    })
+
+    // body에다가 카드들 인스턴스로 집어넣기
+    $(function() {
+      $('.card-columns').append(cards);
+    });
+
+    /********************************** END *************************************/
+  </script>
+</body>
+
+</html>
